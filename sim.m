@@ -36,3 +36,5 @@ INNAME = {"longitudinal control angle", "lateral control angle"};
 sys = ss(A, B, C, D, Tsam, Ncontin, Ndiscr, STNAME, INNAME, STNAME);
 
 % TODO: figure out how to apply a step (i.e. what is meaningful to step?)
+figure; step(sys)
+figure; step(sys, 2)
