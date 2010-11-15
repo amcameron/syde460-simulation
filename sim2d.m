@@ -21,7 +21,7 @@ function P = planpath(X)
     % (δZ/δX)* = Z/X
     P(1) = X(2)/X(1)
 
-    % logarithmic descent rate
+    % logarithmic descent rate (arbitrary coefficients for the moment)
     % Zdot* =~ log(Z + 1)
     % Zdot* = 0 when Z = 0
     a = 1
@@ -53,5 +53,9 @@ endfunction
 function Xdot = globalize(xdot, X)
     Xdot(1:2) = X(3:4)
     Xdot(3:4) = R(X)' * xdot(1:2)'
-    Xdot(5)
+    % filter θ into Θ how?
+    % Xdot(5)   =
+    % Xdot(6)   =
+    % Xdot(7)   =
+    % Xdot(8)   =
 endfunction
