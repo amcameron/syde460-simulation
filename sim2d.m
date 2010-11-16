@@ -53,9 +53,14 @@ endfunction
 function Xdot = globalize(xdot, X)
     Xdot(1:2) = X(3:4)
     Xdot(3:4) = R(X)' * xdot(1:2)'
-    % filter θ into Θ how?
-    % Xdot(5)   =
-    % Xdot(6)   =
-    % Xdot(7)   =
-    % Xdot(8)   =
+
+    % filter θ into Θ
+    % Θdot = Ki * Δθ [axis angle integral controller]
+    % θdot = ~(θdot) - Θdot [don't double count angular velocity]
+    Ki        = 0.04 % axis angle controller integral gain coefficient
+    Xdot(5)   = Ki * (X(7) - X(5))
+    Xdot(7)   = xdot(3) - Xdot(5)
+
+    % Xdot(6)  = Θdotdot???
+    Xdot(8)   = xdot(4)
 endfunction
