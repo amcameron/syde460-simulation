@@ -45,9 +45,18 @@ function A = R(X)
 endfunction
 
 function d = controller(x, p)
+    % change u*, w* into a proportion; try and control w so that w/u = w*/u*.
+    % so, w = w* u / u*
+    w_des = x(1)*p(2)/p(1);
 endfunction
 
 function xdot = plant(x, d)
+    A_long = [-0.1730  0.6538  0.1388 -9.7222;
+              -1.4208 -2.2535 10.7370  1.3093;
+               0.2685 -0.4402 -1.4113  0;
+               0       0       1       0];
+    B_long = [0; 0; 7.46; 0];
+    xdot = A_long * x + B_long * d;
 endfunction
 
 function Xdot = globalize(xdot, X)
