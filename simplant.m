@@ -10,7 +10,22 @@ A_long = [-0.1730  0.6538  0.1388 -9.7222;
            0.2685 -0.4402 -1.4113  0;
            0       0       1       0];
 B_long = [0; 0; 7.46; 0];
-sys_long = ss(A_long, B_long, eye(4)); % output all state variables for now
+C_long = eye(2, 4); % output u and w
+D_long = zeros(2, 1);
+sys_long = ss(A_long, B_long, C_long, D_long);
+
+% Find state and control gains for zero steady-state error
+N_long = [A_long B_long; C_long D_long]\[zeros(4, 2); ones(2, 2)];
+Nx_long = N(1:size(A_long, 1), :);
+Nu_long = N(size(B_long, 2), :);
+
+% Try pole placement: for overshoot <= 5% and settling time <= 4s, we have
+% theta >= 43.6° and sigma <= -1
+% So, try for poles at -2+j, -2-j, -10, -15
+P_long = [-2+j, -2-j, -10, -15];
+K_long = place(sys_long, P_long);
+disp('P:'), disp(P_long)
+disp('eig(A - BK):'), disp(eig(A_long - B_long*K_long))
 
 % Lateral equations:
 A_lat = [-0.2195  -0.1580 -10.7980 9.722 -1.3098;
@@ -19,7 +34,8 @@ A_lat = [-0.2195  -0.1580 -10.7980 9.722 -1.3098;
           0        1        0      0      0;
           0        0        1      0      0];
 B_lat = [0; 3.6136; -0.4311; 0; 0];
-sys_lat = ss(A_lat, B_lat, eye(5)); % output all state variables for now
+C_lat = eye(5); % output all state variables for now
+sys_lat = ss(A_lat, B_lat, C_lat);
 
 % Entire system all at once!
 A = blkdiag(A_long, A_lat);
