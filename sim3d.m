@@ -15,6 +15,7 @@ function Xdot = f(X)
     p    = localizeplan(X, P)
     d    = controller(x, p)
     Xdot = plant(X, d)
+    Xdot = Xdot'
 endfunction
 
 % P = planpath(x) - plan a global frame path to the origin given the current
@@ -44,9 +45,12 @@ function x = localize(X)
 endfunction
 
 function d = controller(x, p)
-    % change u*, w* into a proportion; try and control w so that w/u = w*/u*.
-    % so, w = w* u / u*
-    w_des = x(1)*p(2)/p(1);
+    x2d = [ x(1) x(3) ];
+    Nx_long = [0.9578 0.9578; 0.9367 0.9367; 0.3144 0.3144; 0.0508 0.0508];
+    Nu_long = [0.9578 0.9578];
+    K_long = [-3.1178 -1.0271 3.3729 36.1946];
+    d = [0 0]';
+    d(1) = (Nu_long + K_long*Nx_long)*p - K_long*x2d';
 endfunction
 
 % create a forward rotation matrix (global -> local)
@@ -114,14 +118,14 @@ function Xdot = plant(X, d)
 	- L*lcw*cross(upw, uaz) \
 	- D*lcw*cross(upw, uax)
 
+    % position derivatives given by speeds
+    Xdot(1:3) = X(4:6);
+    Xdot(7:9) = X(10:12);
+
     % F = ma
     Xdot(4:6) = F/m;
     % M = Iα (along primary axes only)
     Xdot(10:12) = ???
-
-    % position derivatives given by speeds
-    Xdot(1:3) = X(4:6);
-    Xdot(7:9) = X(10:12);
 endfunction
 
 % coefficient of lift (only considers incidence ATM)
