@@ -1,6 +1,6 @@
 %
 % Variable Conventions
-% x = { u, v, w }
+% x = { xdot, ydot, zdot, φdot, θdot, ψdot }
 % X = { X, Y, Z, Xdot, Ydot, Zdot, Φ, Θ, Ψ, Φdot, Θdot, Ψdot }
 % P = { (δZ/δX)*, Zdot* }
 % p = { u*, v*, w* } (v* always zero ATM)
@@ -42,11 +42,12 @@ end
 
 function x = localize(X)
     x(1:3) = R(X(7), X(8), X(9)) * X(4:6);
-    x(4:5) = [ X(8) X(11)];
+    x(4:6) = R(X(7), X(8), X(9)) * X(10:12);
 end
 
 function d = controller(x, p)
-    x2d = [ x(1) x(3) ];
+    theta = acos(dot([p(1) p(3)], [x(1) x(3)])/(norm([p(1) p(3)])*norm([x(1) x(3)]));
+    x2d = [ x(1) x(3) theta x(5) ];
     Nx_long = [0.9578 0.9578; 0.9367 0.9367; 0.3144 0.3144; 0.0508 0.0508];
     Nu_long = [0.9578 0.9578];
     K_long = [-3.1178 -1.0271 3.3729 36.1946];
