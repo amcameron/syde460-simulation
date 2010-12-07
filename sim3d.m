@@ -93,9 +93,9 @@ function Xdot = plant(X, d)
 
     % direction from pilot to wing
     uwpbz = 1/sqrt(1 + tan(d(1))^2 + tan(d(2))^2); % uwp dot ubz
-    uwpbx = upwbz * tan(d(1));
-    uwpby = upwbz * tan(d(2));
-    upw   = Rb * -[ upwbx upwby upwbz ];
+    uwpbx = uwpbz * tan(d(1));
+    uwpby = uwpbz * tan(d(2));
+    upw   = Rb * -[ uwpbx uwpby uwpbz ];
 
     % physical parameters
     S   = 16.26; % wing area [m^2]
