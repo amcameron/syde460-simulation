@@ -96,7 +96,7 @@ function Xdot = plant(X, d)
     uwpbz = 1/sqrt(1 + tan(d(1))^2 + tan(d(2))^2); % uwp dot ubz
     uwpbx = uwpbz * tan(d(1));
     uwpby = uwpbz * tan(d(2));
-    upw   = Rb * -[ uwpbx uwpby uwpbz ];
+    upw   = Rb * -[ uwpbx uwpby uwpbz ]';
 
     % physical parameters
     S   = 16.26; % wing area [m^2]
@@ -113,7 +113,7 @@ function Xdot = plant(X, d)
     L  = Cl(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
     D  = Cd(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
     Mp = Cm(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S * c;
-    F  = (mp + mw)*g*ug ...
+    F  = ((mp + mw)*g*ug)' ...
          - L*uaz ...
          - D*uax ...
          + Mp*lcw*cross(uay, upw);
@@ -154,10 +154,10 @@ function coef = Cd(alpha, v)
     a = 0.24555;
     b = -0.060;
     c = 0.08;
-    e = 0.14324;
-    f = -0.035;
-    g = 0.069346;
-    if (alpha <= 7*(pi/180));
+    d = 0.14324;
+    e = -0.035;
+    f = 0.069346;
+    if (alpha <= 7*(pi/180))
         coef = a*alpha^2 + b*alpha + c;
     else
         coef = d*alpha^2 + e*alpha + f;
