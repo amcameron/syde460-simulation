@@ -52,8 +52,8 @@ function d = controller(x, p)
     Nu_long = [0.9578 0.9578];
     K_long = [-3.1178 -1.0271 3.3729 36.1946];
     d = [0 0]';
-    d(1) = (Nu_long + K_long*Nx_long)*p - K_long*x2d';
-endfunction
+    d(1) = (Nu_long + K_long*Nx_long)*p2d' - K_long*x2d';
+end
 
 % create a forward rotation matrix (global -> local)
 % uses 3-2-1 euler angles
