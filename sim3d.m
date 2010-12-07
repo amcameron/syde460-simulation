@@ -125,7 +125,11 @@ function Xdot = plant(X, d)
     % F = ma
     Xdot(4:6) = F/m;
     % M = Iα (along primary axes only)
-    Xdot(10:12) = ???
+    % XXX HORRIBLE ASSUMPTION 
+    % model glider as a sphere (great flying spheres of mathland!)
+    Xdot(10) = M(1)/(2/5*m*lcw^2)
+    Xdot(11) = M(2)/(2/5*m*lcw^2)
+    Xdot(12) = M(3)/(2/5*m*lcw^2)
 endfunction
 
 % coefficient of lift (only considers incidence ATM)
