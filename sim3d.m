@@ -77,7 +77,7 @@ function Xdot = plant(X, d)
 
     % aerodynamic direction vectors (zero wind assumed ATM)
     uax = -(X(4:6)/norm(X(4:6))); % reverse and normalize wind direction
-    uay = uay - (dot(uax,uby)/dot(uax, ubx))*uax; % get uay direction
+    uay = uby - (dot(uax,uby)/dot(uax, ubx))*uax; % get uay direction
     uay = uay/norm(uay); % normalize
     uaz = cross(uax, uay);
 
