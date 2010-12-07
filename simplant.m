@@ -16,14 +16,14 @@ sys_long = ss(A_long, B_long, C_long, D_long);
 
 % Find state and control gains for zero steady-state error
 N_long = [A_long B_long; C_long D_long]\[zeros(4, 2); ones(2, 2)];
-Nx_long = N(1:size(A_long, 1), :);
-Nu_long = N(size(B_long, 2), :);
+Nx_long = N_long(1:size(A_long, 1), :);
+Nu_long = N_long(size(B_long, 2), :);
 
 % Try pole placement: for overshoot <= 5% and settling time <= 4s, we have
 % theta >= 43.6° and sigma <= -1
 % So, try for poles at -2+j, -2-j, -10, -15
 P_long = [-2+j, -2-j, -10, -15];
-K_long = place(sys_long, P_long);
+K_long = place(A_long, B_long, P_long);
 disp('P:'), disp(P_long)
 disp('eig(A - BK):'), disp(eig(A_long - B_long*K_long))
 

@@ -46,10 +46,12 @@ function A = R(X)
 end
 
 function d = controller(x, p)
-    % change u*, w* into a proportion; try and control w so that w/u = w*/u*.
-    % so, w = w* u / u*
-    w_des = x(1)*p(2)/p(1);
-endfunction
+	Nx_long = [0.9578 0.9578; 0.9367 0.9367; 0.3144 0.3144; 0.0508 0.0508];
+	Nu_long = [0.9578 0.9578];
+	K_long = [-3.1178 -1.0271 3.3729 36.1946];
+	d = [0 0]';
+	d(1) = (Nu_long + K_long*Nx_long)*p - K_long*x';
+end
 
 function xdot = plant(x, d)
     A_long = [-0.1730  0.6538  0.1388 -9.7222;
