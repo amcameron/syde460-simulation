@@ -9,12 +9,13 @@
 
 % Xdot = f(X) - calculate the derivatives of the state vector given the current
 % state vector. suitable for running through an ode solver.
-function Xdot = f(t, X)
-    P    = planpath(X);
-    x    = localize(X);
-    p    = localizeplan(X, P);
-    d    = controller(x, p);
-    Xdot = plant(X, d);
+function Xdot = sim3d(t, X)
+    % P    = planpath(X);
+    % x    = localize(X);
+    % p    = localizeplan(X, P);
+    % d    = controller(x, p);
+    Xdot = plant(X, [0 0]);
+    % Xdot = plant(X, d);
     Xdot = Xdot';
 end
 
@@ -78,15 +79,15 @@ function Xdot = plant(X, d)
 
     % aerodynamic direction vectors (zero wind assumed ATM)
     uax = -(X(4:6)/norm(X(4:6))); % reverse and normalize wind direction
-    uay = uby - (dot(uax,uby)/dot(uax, ubx))*uax; % get uay direction
-    uay = uay/norm(uay); % normalize
-    uaz = cross(uax, uay);
+    uaz = cross(uax, uby);
+    uaz = uaz/norm(uaz);          % normalize
+    uay = cross(uaz, uax);
 
     % aerodynamic angles
     sideslip = atan2(dot(uax, uby), dot(uax, ubx));
     attack   = asin(dot(uax, ubz));
 
-    true_airspeed = norm(X(7:9)); % wind assumed to be zero ATM
+    true_airspeed = norm(X(4:6)); % wind assumed to be zero ATM
 
     % direction towards ground
     ug  = [ 0 0  -1 ];
@@ -117,6 +118,7 @@ function Xdot = plant(X, d)
          - L*uaz ...
          - D*uax ...
          + Mp*lcw*cross(uay, upw);
+
     M  = Mp*uay ...
     - L*lcw*cross(upw, uaz) ...
     - D*lcw*cross(upw, uax);
