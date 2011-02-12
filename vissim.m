@@ -7,10 +7,10 @@ function vissim(xs, ts);
     legend('x', 'y');
 
     subplot(3, 3, 2);
-    plot(xs(:,1), xs(:,2));
-    title('birds eye view');
-    xlabel('x');
-    ylabel('y');
+    % plot(xs(:,1), xs(:,2));
+    % title('birds eye view');
+    plot3(xs(:, 1), xs(:,2), xs(:,3));
+    title('trajectory');
 
     subplot(3, 3, 3);
     plot(ts, xs(:, 3));
@@ -45,7 +45,8 @@ function vissim(xs, ts);
     subplot(3, 3, 9);
     mass = 111;
     inertia_matrix = eye(3)*33;
-    plot(ts, xs(:,3)*9.8 + ...
-             1/2*mass*power(norm(xs(:,4:6), 'rows'), 2));
+    plot(ts, mass*xs(:,3)*9.8 + ...
+             1/2*mass*power(norm(xs(:,4:6), 'rows'), 2) + ...
+	     1/2*dot(xs(:,10:12)', I*xs(:,10:12)', 1)');
     title('energy');
 end
