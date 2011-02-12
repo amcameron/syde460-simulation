@@ -1,5 +1,6 @@
 %
 % Variable Conventions
+% Φ - roll, θ - pitch, ψ - yaw
 % x = { xdot, ydot, zdot, φdot, θdot, ψdot }
 % X = { X, Y, Z, Xdot, Ydot, Zdot, Φ, Θ, Ψ, Φdot, Θdot, Ψdot }
 % P = { (δZ/δX)*, Zdot* }
@@ -69,72 +70,38 @@ end
 % given the state vector and the control input, determine the rate of change of
 % the state vector. operates entirely in global frame.
 function Xdot = plant(X, d)
-    % body-frame -> global-frame rotation matrix
-    Rb = R(X(7), X(8), X(9))';
+    longitudinal = [ -0.1730  0.6538  0.1388 -9.7222; ...
+                     -1.4208 -2.2535 10.7370  1.3093; ...
+                      0.2685 -0.4402 -1.4113  0; ...
+                      0       0       1       0 ];
+    lateral = [ -0.2195 -0.1580  -10.798  9.722 -1.3098; ...
+                -1.4670 -21.318    7.5163 0      0; ...
+                 0.2906   3.7362  -2.1119 0      0; ...
+                 0        1        0      0      0; ...
+                 0        0        1      0      0 ];
 
-    % body frame direction vectors
-    ubx = Rb * [ 1 0 0 ]';
-    uby = Rb * [ 0 1 0 ]';
-    ubz = Rb * [ 0 0 1 ]';
+    rot = R(X(7), X(8), X(9));
 
-    % aerodynamic direction vectors (zero wind assumed ATM)
-    uax = -(X(4:6)/norm(X(4:6))); % reverse and normalize wind direction
-    uaz = cross(uax, uby);
-    uaz = uaz/norm(uaz);          % normalize
-    uay = cross(uaz, uax);
+    x(1:3)   = rot*X(1:3);
+    x(4:6)   = rot*X(4:6);
+    x(7:9)   = 0;
+    x(10:12) = rot*X(10:12);
 
-    % aerodynamic angles
-    sideslip = atan2(dot(uax, uby), dot(uax, ubx));
-    attack   = asin(dot(uax, ubz));
+    longdot = longitudinal * [ (x(4) - 10.8) x(6)  x(11) x(8) ]';
+    latdot  = lateral      * [ x(5)          x(10) x(12) x(7) x(9) ]';
 
-    true_airspeed = norm(X(4:6)); % wind assumed to be zero ATM
-
-    % direction towards ground
-    ug  = [ 0 0  -1 ];
-    g   = 9.8; % [N/kg]
-
-    % direction from pilot to wing
-    uwpbz = 1/sqrt(1 + tan(d(1))^2 + tan(d(2))^2); % uwp dot ubz
-    uwpbx = uwpbz * tan(d(1));
-    uwpby = uwpbz * tan(d(2));
-    upw   = Rb * -[ uwpbx uwpby uwpbz ]';
-
-    % physical parameters
-    S   = 16.26; % wing area [m^2]
-    rho = 1.29;  % air density (estimated at sea level, 15C, 1atm on wikipedia) [kg/m^3]
-    c   = 1.626; % reference chord [m]
-    mp  = 80;    % pilot mass [kg]
-    mw  = 31;    % wing mass [kg]
-    lwp = 1.2;   % distance from wing to pilot [m]
-
-    m   = mp + mw; % total mass [kg]
-    lcw = mp/m * lwp; % distance between wing and CoM [m]
-
-    % forces & moments
-    L  = Cl(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
-    D  = Cd(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
-    Mp = Cm(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S * c;
-    F  = ((mp + mw)*g*ug)' ...
-         - L*uaz ...
-         - D*uax ...
-         + Mp*lcw*cross(uay, upw);
-
-    M  = Mp*uay ...
-    - L*lcw*cross(upw, uaz) ...
-    - D*lcw*cross(upw, uax);
-
-    % position derivatives given by speeds
     Xdot(1:3) = X(4:6);
     Xdot(7:9) = X(10:12);
 
-    % F = ma
-    Xdot(4:6) = F/m;
-    % M = Iα (along primary axes only)
-    % XXX HORRIBLE ASSUMPTION 
-    % model glider as a sphere (great flying spheres of mathland!)
-    Xdot(10) = M(1)/(2/5*m*lcw^2);
-    Xdot(11) = M(2)/(2/5*m*lcw^2);
-    Xdot(12) = M(3)/(2/5*m*lcw^2);
+    xdot(4)   = longdot(1);
+    xdot(5)   = latdot(1);
+    xdot(6)   = longdot(2);
+    xdot(10)  = longdot(2);
+    xdot(11)  = longdot(3);
+    xdot(12)  = longdot(3);
+
+    Xdot(4:6)   = rot'*xdot(4:6)';
+    Xdot(10:12) = rot'*xdot(10:12)';
 end
 
 % coefficient of lift (only considers incidence ATM)

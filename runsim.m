@@ -8,7 +8,7 @@ function xs, ts = runsim()
 	      0      0   0   ...
 	      0	     0	 0   ...
     ];
-    ts = linspace(0, 2.5, 10000);
+    ts = linspace(0, 2, 10000);
     sim = @(x,t)sim3d(t, x);
     xs = lsode(sim, xinit, ts);
 end
