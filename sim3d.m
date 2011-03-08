@@ -14,7 +14,7 @@ function Xdot = sim3d(t, X)
     % x    = localize(X);
     % p    = localizeplan(X, P);
     % d    = controller(x, p);
-    Xdot = plant(X, [0 0]);
+    Xdot = plant(X, [-3*pi/16 0]);
     % Xdot = plant(X, d);
     Xdot = Xdot';
 end
@@ -120,6 +120,7 @@ function Xdot = plant(X, d)
     mw  = 31;            % wing mass [kg]
     lwp = 1.2;           % distance from wing to pilot [m]
     lhp = 0.246 - 0.215; % distance of hang point behind wing CoG [m]
+    oswald_eff = 0.95;   % Oswald efficiency number of lift
 
     % direction from hang point to pilot
     uhpbx = sin(d(1));
@@ -136,7 +137,8 @@ function Xdot = plant(X, d)
 
     % forces & moments
     L  = Cl(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
-    D  = Cd(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
+    D  = (Cd_o(attack, true_airspeed) + Cl(attack, true_airspeed)^2/(pi*oswald_eff*S/c)) ...
+	 * 1/2 * rho * true_airspeed^2 * S;
     Mp = Cm(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S * c;
     F  = ((mp + mw)*g*ug)' ...
          + L*uaz ...
@@ -174,7 +176,7 @@ function coef = Cl(alpha, v)
 end
 
 % coefficient of drag (only considers incidence ATM)
-function coef = Cd(alpha, v)
+function coef = Cd_o(alpha, v)
     % piecewise-quadratic approximation of drag curve
     % (sampled at 0deg, 7deg, 15deg, slope @ 7deg fixed at 0)
     a = 0.24555;
