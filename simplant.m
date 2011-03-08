@@ -42,8 +42,9 @@ sys_lat = ss(A_lat, B_lat, C_lat, D_lat);
 % Entire system all at once!
 A = blkdiag(A_long, A_lat);
 B = blkdiag(B_long, B_lat);
-C = eye(9); % output all state variables for now
-D = zeros(9, 2);
+% output axial, normal, and lateral velocities
+C = [1 0 0 0 0 0 0 0 0; 0 1 0 0 0 0 0 0 0; 0 0 0 0 1 0 0 0 0];
+D = zeros(3, 2);
 %Tsam = 0;
 %Ncontin = rows(A);
 %Ndiscr = 0;
@@ -53,7 +54,7 @@ STNAME = {'axial velocity', 'normal velocity', 'pitch rate', ...
 INNAME = {'longitudinal control angle', 'lateral control angle'};
 sys = ss(A, B, C, D);%, Tsam, Ncontin, Ndiscr, STNAME, INNAME, STNAME);
 
-N = [A B; C D]\[zeros(9, 9); ones(9, 9)];
+N = [A B; C D]\[zeros(9, 2); ones(3, 2)];
 Nx = N(1:size(A, 1), :);
 Nu = N(size(B, 2), :);
 
