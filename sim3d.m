@@ -112,35 +112,40 @@ function Xdot = plant(X, d)
     ug  = [ 0 0  -1 ];
     g   = 9.8; % [N/kg]
 
-    % direction from pilot to wing
-    uwpbz = 1/sqrt(1 + tan(d(1))^2 + tan(d(2))^2); % uwp dot ubz
-    uwpbx = uwpbz * tan(d(1));
-    uwpby = uwpbz * tan(d(2));
-    upw   = Rb * -[ uwpbx uwpby uwpbz ]';
-
     % physical parameters
-    S   = 16.26; % wing area [m^2]
-    rho = 1.29;  % air density (estimated at sea level, 15C, 1atm on wikipedia) [kg/m^3]
-    c   = 1.626; % reference chord [m]
-    mp  = 80;    % pilot mass [kg]
-    mw  = 31;    % wing mass [kg]
-    lwp = 1.2;   % distance from wing to pilot [m]
+    S   = 16.26;         % wing area [m^2]
+    rho = 1.29;          % air density (estimated at sea level, 15C, 1atm on wikipedia) [kg/m^3]
+    c   = 1.626;         % reference chord [m]
+    mp  = 80;            % pilot mass [kg]
+    mw  = 31;            % wing mass [kg]
+    lwp = 1.2;           % distance from wing to pilot [m]
+    lhp = 0.246 - 0.215; % distance of hang point behind wing CoG [m]
 
-    m   = mp + mw; % total mass [kg]
-    lcw = mp/m * lwp; % distance between wing and CoM [m]
+    % direction from hang point to pilot
+    uhpbx = sin(d(1));
+    uhpby = sin(d(2))*cos(d(1));
+    uhpbz = cos(d(2))*cos(d(1));
+    uhp   = Rb * [ uhpbx uhpby uhpbz ]';
+
+    % direction from wing cog to pilot
+    wp  = lhp * Rb * [ -1 0 0 ]' + lwp * uhp;
+
+    m   = mp + mw;    % total mass [kg]
+    cw  = mp/m * -wp; % direction from CoM to wing [m]
+    cp  = cw + wp;    % direction from CoM to pilot [m]
 
     % forces & moments
     L  = Cl(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
     D  = Cd(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
     Mp = Cm(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S * c;
     F  = ((mp + mw)*g*ug)' ...
-         - L*uaz ...
+         + L*uaz ...
          - D*uax ...
-         + Mp*lcw*cross(uay, upw);
+         + cross(cw, Mp * uay);
 
     M  = Mp*uay ...
-    - L*lcw*cross(upw, uaz) ...
-    - D*lcw*cross(upw, uax);
+         + cross(cw,  L*uaz);
+         + cross(cw, -D*uax);
 
     % position derivatives given by speeds
     Xdot(1:3) = X(4:6);
@@ -151,9 +156,9 @@ function Xdot = plant(X, d)
     % M = Iα (along primary axes only)
     % XXX HORRIBLE ASSUMPTION 
     % model glider as a sphere (great flying spheres of mathland!)
-    Xdot(10) = M(1)/(2/5*m*lcw^2);
-    Xdot(11) = M(2)/(2/5*m*lcw^2);
-    Xdot(12) = M(3)/(2/5*m*lcw^2);
+    Xdot(10) = M(1)/(2/5*m*norm(cw)^2);
+    Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
+    Xdot(12) = M(3)/(2/5*m*norm(cw)^2);
 end
 
 % coefficient of lift (only considers incidence ATM)
