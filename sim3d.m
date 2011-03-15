@@ -90,18 +90,23 @@ function Xdot = plant(X, d)
     longdot = longitudinal * [ (x(4) - 10.8) x(6)  x(11) x(8) ]';
     latdot  = lateral      * [ x(5)          x(10) x(12) x(7) x(9) ]';
 
-    Xdot(1:3) = X(4:6);
-    Xdot(7:9) = X(10:12);
-
     xdot(4)   = longdot(1);
     xdot(5)   = latdot(1);
     xdot(6)   = longdot(2);
-    xdot(10)  = longdot(2);
+    xdot(7)   = latdot(4);
+    xdot(8)   = longdot(4);
+    xdot(9)   = latdot(5);
+    xdot(10)  = latdot(2);
     xdot(11)  = longdot(3);
-    xdot(12)  = longdot(3);
+    xdot(12)  = latdot(3);
 
-    Xdot(4:6)   = rot'*xdot(4:6)';
-    Xdot(10:12) = rot'*xdot(10:12)';
+    Xdot(1:3)   = X(4:6);
+    Xdot(7:9)   = rot\xdot(7:9)';
+    Xdot(4:6)   = rot\xdot(4:6)';
+    Xdot(10:12) = rot\xdot(10:12)';
+    X
+    xdot
+    Xdot'
 end
 
 % coefficient of lift (only considers incidence ATM)
