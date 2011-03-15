@@ -15,7 +15,7 @@ function Xdot = sim3d(t, X)
     % x    = localize(X);
     % p    = localizeplan(X, P);
     % d    = controller(x, p);
-    Xdot = plant(X, [0 0]);
+    Xdot = plant(X, [-3*pi/16 0]);
     % Xdot = plant(X, d);
     Xdot = Xdot';
 end
