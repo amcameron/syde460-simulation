@@ -151,6 +151,7 @@ function Xdot = plant(X, d)
     % M = Iα (along primary axes only)
     % XXX HORRIBLE ASSUMPTION 
     % model glider as a sphere (great flying spheres of mathland!)
+	% ^-- Andrew endorses the above comment.
     Xdot(10) = M(1)/(2/5*m*norm(cw)^2);
     Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
     Xdot(12) = M(3)/(2/5*m*norm(cw)^2);
