@@ -50,10 +50,26 @@ function x = localize_state(X)
 end
 
 function d = controller(x, p)
+    % Cut and paste state variables into the form the linearized model expects.
+    % Ditto with the reference input.
     x3d = [ x(4) x(6) x(11) x(8) x(5) x(10) x(12) x(7) x(9) ];
-    p2d = [ p(1) p(3) p(2) ];
+    %TODO: change p input to be pitch & roll (Θ*, Φ*) instead of u*, v*, w*
+    p3d = [ p(1) p(3) p(2) ];
 
-	Kstate = [ ...
+    % Create the error signal of the now.
+    e3d = [x(8) x(7)] - p3d;
+
+    % Use a persistent accumulator for the integrated output error.
+    % Persistent variables are initialized to [].
+    persistent z;
+    if (isempty(z))
+        z = 0;
+    end
+
+    %TODO: should this be accounting for timestep? how?
+    z = z + e3d;
+
+    Kstate = [ ...
 95108.9185474388   29118.8277378886 18.2742882107397 -324895.868845913 ...
 -375505.168034732 -38615.7091973777 -323697.174252387 357293.580324904 ...
 -4193737.92294423; ...
@@ -61,12 +77,11 @@ function d = controller(x, p)
 -1248927.45087099 -121358.063111166 -1017512.60373025  1104840.16906034 ...
 -13997231.2401959];
 
-	Kref = [ ...
+    Kref = [ ...
 954207.967471406 3322468.63455386; ...
 1243204.13304077 11228793.1228830];
 
-	% TODO: create z, the integrated error signal (r - y)
-	d = (-[Kstate Kref]*[x3d; z])';
+    d = (-[Kstate Kref]*[x3d; z])';
 end
 
 % create a forward rotation matrix (global -> local)
@@ -131,7 +146,7 @@ function Xdot = plant(X, d)
     % forces & moments
     L  = Cl(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S;
     D  = (Cd_o(attack, true_airspeed) + Cl(attack, true_airspeed)^2/(pi*oswald_eff*S/c)) ...
-	 * 1/2 * rho * true_airspeed^2 * S;
+     * 1/2 * rho * true_airspeed^2 * S;
     Mp = Cm(attack, true_airspeed) * 1/2 * rho * true_airspeed^2 * S * c;
     F  = ((mp + mw)*g*ug)' ...
          + L*uaz ...
@@ -151,7 +166,7 @@ function Xdot = plant(X, d)
     % M = Iα (along primary axes only)
     % XXX HORRIBLE ASSUMPTION 
     % model glider as a sphere (great flying spheres of mathland!)
-	% ^-- Andrew endorses the above comment.
+    % ^-- Andrew endorses the above comment.
     Xdot(10) = M(1)/(2/5*m*norm(cw)^2);
     Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
     Xdot(12) = M(3)/(2/5*m*norm(cw)^2);
