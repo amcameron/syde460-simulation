@@ -40,9 +40,16 @@ Btilde = [B; zeros(2,2)];
 rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
 %TODO: run PBH controllability test (ECE488 notes S5 p.24)
 % -- find which modes are uncontrollable; find if system is Stabilizable
-P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
-K = place(Atilde, Btilde, P);
-disp('P:'), disp(P')
+%P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
+% Let's try LQR control.
+% Q is the penalty for state variables. Let's penalize them  all.
+Q = eye(size(Atilde));
+% R is the penalty for control signals. Let's penalize them both, especially
+% the longitudinal control input.
+R = [10 0; 0 1];
+K = lqr(Atilde, Btilde, Q, R);
+disp('Q:'), disp(Q)
+disp('R:'), disp(R)
 disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
 disp('K:'), disp(K)
 
