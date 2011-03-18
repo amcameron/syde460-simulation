@@ -22,16 +22,36 @@ end
 % P = planpath(x) - plan a global frame path to the origin given the current
 % state vector.
 function P = planpath(X)
-    % naive linear path planning
-    % (δZ/δX)* = Z/X
-    P(1) = X(3)/X(1);
+    % first priority - align craft orientation with trajectory
+    utraj = X(5:7)/norm(X(5:7));
+    alignedness = dot(utraj, R(X(7), X(8), X(9)) * [1 0 0]');
+    if alignedness < cos(pi/16)
+	% alignment outside +-~10 degrees of trajectory
+	% decide how to get to trajectory window, banking, pitching, or both
+	d_align_by_d_pitch = dot(utraj, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
+	d_align_by_d_yaw   = dot(utraj, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
+	% magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
+	magnitude  = 1 - alignedness;
+	deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
+	pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
+	yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
+    else
+	% craft is in nominally aligned flight-envelope, attempt manoeuvres towards origin
+	uorig = -X(1:3)/norm(X(1:3));
+	alignedness = dot(uorig, R(X(7), X(8), X(9)) * [1 0 0]');
+	% decide how to point towards origin, banking, pitching, or both
+	d_align_by_d_pitch = dot(uorig, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
+	d_align_by_d_yaw   = dot(uorig, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
+	% magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
+	magnitude  = 1 - alignedness;
+	deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
+	pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
+	yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
+    end
 
-    % logarithmic descent rate (arbitrary coefficients for the moment)
-    % Zdot* =~ log(Z + 1)
-    % Zdot* = 0 when Z = 0
-    a = 1;
-    b = 1000;
-    P(2) = a*log(X(3)/b + 1);
+    % we have control of pitch and roll, but pitch and yaw are how trajectory works
+    % roll by negative yaw target, yaw becomes pitch, and (hopefully) things work themselves out
+    P = [pitch_star, -yaw_star];
 end
 
 % p = localizeplan(X, P) - create a local frame version of a global frame plan
