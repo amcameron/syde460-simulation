@@ -10,7 +10,7 @@
 % Xdot = f(X) - calculate the derivatives of the state vector given the current
 % state vector. suitable for running through an ode solver.
 function Xdot = sim3d(t, X)
-    P    = planpath(X)
+    P    = planpath(X);
     x    = localize_state(X);
     z    = X(13:14);
     d  = controller(x, z);

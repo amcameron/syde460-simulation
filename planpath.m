@@ -28,6 +28,6 @@ function P = planpath(X)
 
     % we have control of pitch and roll, but pitch and yaw are how trajectory works
     % roll by negative yaw target, yaw becomes pitch, and (hopefully) things work themselves out
-    P = [-X(8), -yaw_star];
+    P = [pitch_star, -yaw_star];
 end
 
