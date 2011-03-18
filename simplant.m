@@ -46,7 +46,7 @@ rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
 Q = eye(size(Atilde));
 % R is the penalty for control signals. Let's penalize them both, especially
 % the longitudinal control input.
-R = [10 0; 0 1];
+R = [500 0; 0 1];
 K = lqr(Atilde, Btilde, Q, R);
 disp('Q:'), disp(Q)
 disp('R:'), disp(R)
