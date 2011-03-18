@@ -43,7 +43,9 @@ rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
 %P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
 % Let's try LQR control.
 % Q is the penalty for state variables. Let's penalize them  all.
+% Penalize pitch rate especially hard.
 Q = eye(size(Atilde));
+Q(3, 3) = 500;
 % R is the penalty for control signals. Let's penalize them both, especially
 % the longitudinal control input.
 R = [500 0; 0 1];
