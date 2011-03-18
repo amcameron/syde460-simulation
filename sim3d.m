@@ -10,12 +10,14 @@
 % Xdot = f(X) - calculate the derivatives of the state vector given the current
 % state vector. suitable for running through an ode solver.
 function Xdot = sim3d(t, X)
-    % P    = planpath(X);
-    % x    = localize_state(X);
+    P    = planpath(X);
+    x    = localize_state(X);
     % p    = localizeplan(X, P);
-    % d    = controller(x, p);
-    Xdot = plant(X, [-3*pi/16 0]);
-    % Xdot = plant(X, d);
+    z    = X(13:14);
+    d    = controller(x, z);
+    % Xdot = plant(X, [-3*pi/16 0]);
+    Xdot = plant(X, d);
+    Xdot(13:14) = [x(8) x(7)] - P;
     Xdot = Xdot';
 end
 
@@ -23,30 +25,30 @@ end
 % state vector.
 function P = planpath(X)
     % first priority - align craft orientation with trajectory
-    utraj = X(5:7)/norm(X(5:7));
+    utraj = X(4:6)/norm(X(4:6));
     alignedness = dot(utraj, R(X(7), X(8), X(9)) * [1 0 0]');
     if alignedness < cos(pi/16)
-	% alignment outside +-~10 degrees of trajectory
-	% decide how to get to trajectory window, banking, pitching, or both
-	d_align_by_d_pitch = dot(utraj, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
-	d_align_by_d_yaw   = dot(utraj, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
-	% magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
-	magnitude  = 1 - alignedness;
-	deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
-	pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
-	yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
+    % alignment outside +-~10 degrees of trajectory
+    % decide how to get to trajectory window, banking, pitching, or both
+    d_align_by_d_pitch = dot(utraj, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
+    d_align_by_d_yaw   = dot(utraj, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
+    % magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
+    magnitude  = 1 - alignedness;
+    deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
+    pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
+    yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
     else
-	% craft is in nominally aligned flight-envelope, attempt manoeuvres towards origin
-	uorig = -X(1:3)/norm(X(1:3));
-	alignedness = dot(uorig, R(X(7), X(8), X(9)) * [1 0 0]');
-	% decide how to point towards origin, banking, pitching, or both
-	d_align_by_d_pitch = dot(uorig, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
-	d_align_by_d_yaw   = dot(uorig, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
-	% magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
-	magnitude  = 1 - alignedness;
-	deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
-	pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
-	yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
+    % craft is in nominally aligned flight-envelope, attempt manoeuvres towards origin
+    uorig = -X(1:3)/norm(X(1:3));
+    alignedness = dot(uorig, R(X(7), X(8), X(9)) * [1 0 0]');
+    % decide how to point towards origin, banking, pitching, or both
+    d_align_by_d_pitch = dot(uorig, R(X(7) + pi/360, X(8), X(9)) * [1 0 0]') - alignedness;
+    d_align_by_d_yaw   = dot(uorig, R(X(7), X(8), X(9) + pi/360) * [1 0 0]') - alignedness;
+    % magnitude of angle change we need (approximated by 1-cos(x)=x for small x)
+    magnitude  = 1 - alignedness;
+    deriv_mag  = norm([d_align_by_d_pitch d_align_by_d_yaw]);
+    pitch_star = magnitude * d_align_by_d_pitch/deriv_mag;
+    yaw_star   = magnitude * d_align_by_d_yaw/deriv_mag;
     end
 
     % we have control of pitch and roll, but pitch and yaw are how trajectory works
@@ -69,38 +71,21 @@ function x = localize_state(X)
     x(10:12) = Rb * X(10:12);
 end
 
-function d = controller(x, p)
+function d = controller(x, z)
     % Cut and paste state variables into the form the linearized model expects.
     % Ditto with the reference input.
-    x3d = [ x(4) x(6) x(11) x(8) x(5) x(10) x(12) x(7) x(9) ];
-    %TODO: change p input to be pitch & roll (Θ*, Φ*) instead of u*, v*, w*
-    p3d = [ p(1) p(3) p(2) ];
-
-    % Create the error signal of the now.
-    e3d = [x(8) x(7)] - p3d;
-
-    % Use a persistent accumulator for the integrated output error.
-    % Persistent variables are initialized to [].
-    persistent z;
-    if (isempty(z))
-        z = 0;
-    end
-
-    %TODO: should this be accounting for timestep? how?
-    z = z + e3d;
+    x3d = [ x(4) x(6) x(11) x(8) x(5) x(10) x(12) x(7) x(9) ]';
 
     Kstate = [ ...
-95108.9185474388   29118.8277378886 18.2742882107397 -324895.868845913 ...
--375505.168034732 -38615.7091973777 -323697.174252387 357293.580324904 ...
--4193737.92294423; ...
- 127995.903128420  38003.3548986827  4.08649091592160 -425359.863964595 ...
--1248927.45087099 -121358.063111166 -1017512.60373025  1104840.16906034 ...
--13997231.2401959];
+0.0681727830609925  -0.0243496719914994 -0.475105100370250  0.144762980725940   0.000799173261357028    0.00573081094154851 -0.00261377491722098    -0.00412332275473462    0.000555776776680161; ...
+-0.000423810197258556   -0.000495414620034253   0.00313541751808042 -0.00148995588293670    -0.425827953765939  -6.22255943366371   1.84893338046848    0.345637320828607   -0.0465655002928676; ...
+
+];
 
     Kref = [ ...
-954207.967471406 3322468.63455386; ...
-1243204.13304077 11228793.1228830];
-
+3.30412239793666e-08    2.02131783231568e-08; ...
+1.76727087572966e-08    3.32570710048922e-08; ...
+];
     d = (-[Kstate Kref]*[x3d; z])';
 end
 

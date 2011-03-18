@@ -40,10 +40,10 @@ Btilde = [B; zeros(2,2)];
 rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
 %TODO: run PBH controllability test (ECE488 notes S5 p.24)
 % -- find which modes are uncontrollable; find if system is Stabilizable
-P = [-2+j, -2-j, -10, -15, -20, -25, -30, -35, -40, -45, -50];
+P = 0.01*[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11];
 K = place(Atilde, Btilde, P);
 disp('P:'), disp(P')
-disp('eig(A - BK):'), disp(eig(Atilde - Btilde*K))
+disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
 disp('K:'), disp(K)
 
 %% Prepare Nyquist and pole-zero plots for each input-state TF
