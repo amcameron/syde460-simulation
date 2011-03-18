@@ -40,7 +40,7 @@ Btilde = [B; zeros(2,2)];
 rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
 %TODO: run PBH controllability test (ECE488 notes S5 p.24)
 % -- find which modes are uncontrollable; find if system is Stabilizable
-P = 0.01*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
+P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
 K = place(Atilde, Btilde, P);
 disp('P:'), disp(P')
 disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
