@@ -9,6 +9,16 @@
 
 % Xdot = f(X) - calculate the derivatives of the state vector given the current
 % state vector. suitable for running through an ode solver.
+% outline:
+% -planpath calculates the desired pitch & roll, P, based on state.
+%   (the target is always the origin of the coordinate system.)
+%   **THIS** is currently where most of the "magic" happens.
+% -the global state, X, is localized to the glider's frame (x)
+% -the two "extra" values in X are the integrated output error, z.
+%   (z is difference in pitch, and doesn't need localization.)
+% -the controller calculates the control input (d) based on the local state and z.
+% -the state derivative is calculated by the aerodynamic simulation, plant()
+% -the derivative of the integrated output error is the current output error.
 function Xdot = sim3d(t, X)
     P    = planpath(X);
     x    = localize_state(X);
