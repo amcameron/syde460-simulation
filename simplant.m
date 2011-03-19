@@ -37,9 +37,10 @@ sys = ss(A, B, C, D);
 
 Atilde = [A zeros(9,2); C zeros(2,2)]; % 11x11
 Btilde = [B; zeros(2,2)];
-rank(ctrb(Atilde, Btilde)) % rank is 8, should be 11
-%TODO: run PBH controllability test (ECE488 notes S5 p.24)
-% -- find which modes are uncontrollable; find if system is Stabilizable
+e = eig(Atilde);
+for i = 1:length(e)
+	rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde])
+end
 %P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
 % Let's try LQR control.
 % Q is the penalty for state variables. Let's penalize them  all.
