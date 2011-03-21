@@ -32,7 +32,7 @@ function vissim(xs, ts);
 
     % angles row
     subplot(3, 3, 7);
-    plot(ts, xs(:,7:9));
+    plot(ts, mod(xs(:,7:9)+pi, 2*pi)-pi);
     title('angles');
     legend('\phi', '\theta', '\psi');
 
