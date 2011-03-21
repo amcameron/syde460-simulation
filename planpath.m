@@ -13,8 +13,8 @@ function P = planpath(X)
     % first priority - stay level
     verticality = dot(udir, [0 0 1]);
     if verticality > sin(pi/16)
-	d_by_d_yaw   = (1/delt)*(dot(udir_plus_d_yaw,   [0 0 1]) - verticality)
-	d_by_d_pitch = (1/delt)*(dot(udir_plus_d_pitch, [0 0 1]) - verticality)
+	d_by_d_yaw   = (1/delt)*(dot(udir_plus_d_yaw,   [0 0 1]) - verticality);
+	d_by_d_pitch = (1/delt)*(dot(udir_plus_d_pitch, [0 0 1]) - verticality);
 	yaw_star     = X(7) - step*d_by_d_yaw;
 	pitch_star   = X(8) - step*d_by_d_pitch;
     else
@@ -26,11 +26,11 @@ function P = planpath(X)
 	    yaw_star   = X(7) + step*d_by_d_yaw;
 	    pitch_star = X(8) + step*d_by_d_pitch;
 	else
-	    % third priority - point towards target (origin)
-	    uorig = -X(1:3)/norm(X(1:3));
-	    alignedness = dot(uorig, udir);
-	    d_by_d_yaw   = (1/delt)*(dot(uorig, udir_plus_d_yaw)   - alignedness);
-	    d_by_d_pitch = (1/delt)*(dot(uorig, udir_plus_d_pitch) - alignedness);
+	    % third priority - steer (trajectory) towards target (origin)
+	    uorig        = -X(1:3)/norm(X(1:3));
+	    alignedness  = dot(uorig, utraj);
+	    d_by_d_yaw   = (1/delt)*(dot(uorig, R(X(7) + delt,X(8),X(9))*R(X(7),X(8),X(9))'*utraj) - alignedness);
+	    d_by_d_pitch = (1/delt)*(dot(uorig, R(X(7),X(8) + delt,X(9))*R(X(7),X(8),X(9))'*utraj) - alignedness);
 	    yaw_star   = X(7) + step*d_by_d_yaw;
 	    pitch_star = X(8) + step*d_by_d_pitch;
 	end
