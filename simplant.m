@@ -2,6 +2,7 @@
 % using the methods presented in the paper by M. V. Cook and M. Spottiswoode
 % in the January 2006 issue of The Aeronautical Journal.
 
+%% System creation
 % Longitudinal equations:
 A_long = [-0.1730  0.6538  0.1388 -9.7222;
           -1.4208 -2.2535 10.7370  1.3093;
@@ -35,13 +36,24 @@ STNAME = {'axial velocity', 'normal velocity', 'pitch rate', ...
 INNAME = {'longitudinal control angle', 'lateral control angle'};
 sys = ss(A, B, C, D);
 
+% Augment the system with an integrator for tracking.
 Atilde = [A zeros(9,2); C zeros(2,2)]; % 11x11
 Btilde = [B; zeros(2,2)];
+
+%% PBH controllability test
 e = eig(Atilde);
+ranks = zeros(11, 1);
 for i = 1:length(e)
-	rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde])
+	ranks(i) = rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde]);
 end
-%P = 0.005*[-1, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14];
+disp('PBH controllability results - all modes controllable?')
+if all(ranks == 11)
+    disp('Yes!')
+else
+    disp('*** NO! ***')
+end
+
+%% Controller design
 % Let's try LQR control.
 % Q is the penalty for state variables. Let's penalize them  all.
 % Penalize pitch rate especially hard.
@@ -51,10 +63,22 @@ Q(3, 3) = 500;
 % the longitudinal control input.
 R = [500 0; 0 1];
 K = lqr(Atilde, Btilde, Q, R);
+K1 = K(:, 1:9); K2 = K(:, 10:11);
 disp('Q:'), disp(Q)
 disp('R:'), disp(R)
 disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
 disp('K:'), disp(K)
+
+%% Closed-loop response of linearized system
+Acl = [A-B*K1 -B*K2; C zeros(2)];
+Bcl = [zeros(9,2); -eye(2)];
+Ccl = [C zeros(2)];
+Dcl = zeros(2);
+cls_sys = ss(Acl, Bcl, Ccl, Dcl);
+figure
+step(cls_sys)
+
+%% TODO: Observer design - angle attitudes (yaw, pitch, roll) are unknown
 
 %% Prepare Nyquist and pole-zero plots for each input-state TF
 %for input=1:size(B, 2)
