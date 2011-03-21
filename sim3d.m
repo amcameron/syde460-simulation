@@ -20,7 +20,8 @@
 % -the state derivative is calculated by the aerodynamic simulation, plant()
 % -the derivative of the integrated output error is the current output error.
 function Xdot = sim3d(t, X)
-    P    = planpath(X);
+    % P    = planpath(X);
+    P = [0 0]';
     x    = localize_state(X);
     z    = X(13:14);
     d  = controller(x, z);

@@ -58,10 +58,11 @@ end
 % Q is the penalty for state variables. Let's penalize them  all.
 % Penalize pitch rate especially hard.
 Q = eye(size(Atilde));
-Q(3, 3) = 500;
+Q(10, 10) = 9000;
+Q(11, 11) = 9000;
 % R is the penalty for control signals. Let's penalize them both, especially
 % the longitudinal control input.
-R = [500 0; 0 1];
+R = [1 0; 0 1];
 K = lqr(Atilde, Btilde, Q, R);
 K1 = K(:, 1:9); K2 = K(:, 10:11);
 disp('Q:'), disp(Q)
