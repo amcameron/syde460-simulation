@@ -13,5 +13,8 @@ function d = controller(x, z)
     -1.33796062521931e-14   0.999999999999995; ...
 ];
     d = (-[Kstate Kref]*[x3d; z])';
+
+    % limit to physically achievable values
+    d = max(min(d, pi/4), -pi/4);
 end
 

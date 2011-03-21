@@ -24,7 +24,6 @@ function Xdot = sim3d(t, X)
     x    = localize_state(X);
     z    = X(13:14);
     d  = controller(x, z);
-    % d = max(min(d, pi/2), -pi/2)
     % Xdot = plant(X, [-3*pi/16 0]);
     Xdot = plant(X, d);
     Xdot(13:14) = P;
