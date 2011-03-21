@@ -15,29 +15,29 @@ function P = planpath(X)
     if verticality > sin(pi/16)
 	d_by_d_yaw   = (1/delt)*(dot(udir_plus_d_yaw,   [0 0 1]) - verticality);
 	d_by_d_pitch = (1/delt)*(dot(udir_plus_d_pitch, [0 0 1]) - verticality);
-	yaw_star     = X(7) - step*d_by_d_yaw;
-	pitch_star   = X(8) - step*d_by_d_pitch;
+	yaw_star     = -step*d_by_d_yaw;
+	pitch_star   = -step*d_by_d_pitch;
     else
 	% second priority - align craft orientation with trajectory
 	alignedness = dot(utraj, udir);
 	if alignedness < cos(pi/16)
 	    d_by_d_yaw   = (1/delt)*(dot(utraj, udir_plus_d_yaw)   - alignedness);
 	    d_by_d_pitch = (1/delt)*(dot(utraj, udir_plus_d_pitch) - alignedness);
-	    yaw_star   = X(7) + step*d_by_d_yaw;
-	    pitch_star = X(8) + step*d_by_d_pitch;
+	    yaw_star   = step*d_by_d_yaw;
+	    pitch_star = step*d_by_d_pitch;
 	else
 	    % third priority - steer (trajectory) towards target (origin)
 	    uorig        = -X(1:3)/norm(X(1:3));
 	    alignedness  = dot(uorig, utraj);
 	    d_by_d_yaw   = (1/delt)*(dot(uorig, R(X(7) + delt,X(8),X(9))*R(X(7),X(8),X(9))'*utraj) - alignedness);
 	    d_by_d_pitch = (1/delt)*(dot(uorig, R(X(7),X(8) + delt,X(9))*R(X(7),X(8),X(9))'*utraj) - alignedness);
-	    yaw_star   = X(7) + step*d_by_d_yaw;
-	    pitch_star = X(8) + step*d_by_d_pitch;
+	    yaw_star   = step*d_by_d_yaw;
+	    pitch_star = step*d_by_d_pitch;
 	end
     end
 
     % we have control of pitch and roll, but pitch and yaw are how trajectory works
     % roll by negative scaled yaw target, yaw becomes pitch, and (hopefully) things work themselves out
-    P = [pitch_star, -0.2*yaw_star];
+    P = [pitch_star, -yaw_star];
 end
 
