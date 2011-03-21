@@ -60,7 +60,7 @@ function Xdot = plant(X, d)
          + cross(cw, Mp * uay);
 
     M  = Mp*uay ...
-         + cross(cw,  L*uaz);
+         + cross(cw,  L*uaz) ...
          + cross(cw, -D*uax);
 
     % position derivatives given by speeds
@@ -73,9 +73,9 @@ function Xdot = plant(X, d)
     % XXX HORRIBLE ASSUMPTION 
     % model glider as a sphere (great flying spheres of mathland!)
     % ^-- Andrew endorses the above comment.
-    Xdot(10) = M(1)/(2/5*m*norm(cw)^2);
+    Xdot(10) = M(3)/(2/5*m*norm(cw)^2);
     Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
-    Xdot(12) = M(3)/(2/5*m*norm(cw)^2);
+    Xdot(12) = M(1)/(2/5*m*norm(cw)^2);
 end
 
 % coefficient of lift (only considers incidence ATM)
