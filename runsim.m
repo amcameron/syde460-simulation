@@ -1,4 +1,4 @@
-function xs, ts = runsim()
+function [xs, ts] = runsim()
     % initial position
     % initial velocity
     % inital angles
@@ -10,8 +10,9 @@ function xs, ts = runsim()
           0      0   0   ...
           0      0       ...
     ];
-    ts = linspace(0, 2, 1000);
-    sim = @(x,t)sim3d(t, x);
-    lsode_options('integration method', 'stiff');
-    xs = lsode(sim, xinit, ts);
+    %ts = linspace(0, 2, 1000);
+    tspan = [0 2.0];
+    sim = @sim3d;
+    %lsode_options('integration method', 'stiff');
+    [ts xs] = ode15s(sim, tspan, xinit);
 end

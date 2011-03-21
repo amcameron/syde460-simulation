@@ -27,7 +27,7 @@ function vissim(xs, ts);
     title('vertical velocity');
 
     subplot(3, 3, 6);
-    plot(ts, norm(xs(:, 4:6), 'rows'));
+    plot(ts, (xs(:,4).^2 + xs(:,5).^2 + xs(:,6).^2).^(1/2));
     title('airspeed');
 
     % angles row
@@ -46,7 +46,7 @@ function vissim(xs, ts);
     mass = 111;
     inertia_matrix = eye(3)*33;
     plot(ts, mass*xs(:,3)*9.8 + ...
-             1/2*mass*power(norm(xs(:,4:6), 'rows'), 2) + ...
-	     1/2*dot(xs(:,10:12)', I*xs(:,10:12)', 1)');
+         1/2*mass*power((xs(:,4).^2 + xs(:,5).^2 + xs(:,6).^2).^(1/2), 2) + ...
+         1/2*dot(xs(:,10:12)', j*xs(:,10:12)', 1)');
     title('energy');
 end
