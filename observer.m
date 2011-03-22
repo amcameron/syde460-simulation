@@ -1,6 +1,7 @@
-function d = controller(x, z)
+function xhatdot = observer(x, u)
     % Cut and paste state variables into the form the linearized model expects.
     % Ditto with the reference input.
+    xhat = x(15:23)';
     x3d = [ x(4) x(6) x(11) x(22) x(5) x(10) x(12) x(23) x(21) ]';
 
     persistent A B C H Kstate Kref;
@@ -8,9 +9,8 @@ function d = controller(x, z)
         [A B C H Kstate Kref] = simplant;
     end
 
-    d = (-[Kstate Kref]*[x3d; z])';
+    y = C*x3d;
 
-    % limit to physically achievable values
-    d = max(min(d, pi/4), -pi/4);
+    xhatdot = A*xhat + B*u' + H*(y - C*xhat);
 end
 
