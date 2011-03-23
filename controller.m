@@ -1,17 +1,16 @@
 function d = controller(x, z)
     % Cut and paste state variables into the form the linearized model expects.
     % Ditto with the reference input.
-    x3d = [ x(4) x(6) x(11) x(8) x(5) x(10) x(12) x(7) x(9) ]';
+    % Adjust the pitch by the steady-state value to get the disturbance pitch.
+    % Steady-state values for roll & yaw are zero.
+    % TODO: put disturbance pitch adjustment in localize_state
+    x3d = [ x(4) x(6) x(11) (x(8)+0.2621) x(5) x(10) x(12) x(9) x(7) ]';
 
-    Kstate = [ ...
-0.0388827073240802  0.0268791472119372  2.56567934346432    24.1504550747186    -3.35887703225767e-16   2.11145456952645e-15    1.30618473759538e-14    1.57377309933184e-14    1.76695380517993e-15; ...
--3.49432293179054e-15   -2.46448913289262e-15   2.67961103038485e-16    3.07433084410069e-14    -0.378188079505688  1.94395557947348    2.14995183476745    38.3542950862639    0.0368175580654926; ...
-];
+    persistent A B C H Kstate Kref;
+    if (isempty(A))
+        [A B C H Kstate Kref] = simplant;
+    end
 
-    Kref = [ ...
-94.8683298050514    6.02293527667080e-14; ...
-4.79165260706971e-14    94.8683298050516; ...
-];
     d = (-[Kstate Kref]*[x3d; z])';
 
     % limit to physically achievable values

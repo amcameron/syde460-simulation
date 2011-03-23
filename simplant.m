@@ -1,3 +1,4 @@
+function [A B C H K1 K2] = simplant()
 % Simulation of the models generated from the Hiway 'Demon' model glider
 % using the methods presented in the paper by M. V. Cook and M. Spottiswoode
 % in the January 2006 issue of The Aeronautical Journal.
@@ -42,16 +43,16 @@ Btilde = [B; zeros(2,2)];
 
 %% PBH controllability test
 e = eig(Atilde);
-ranks = zeros(11, 1);
+ctrb_ranks = zeros(size(e));
 for i = 1:length(e)
-	ranks(i) = rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde]);
+	ctrb_ranks(i) = rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde]);
 end
-disp('PBH controllability results - all modes controllable?')
-if all(ranks == 11)
-    disp('Yes!')
-else
-    disp('*** NO! ***')
-end
+%disp('PBH controllability results - all modes controllable?')
+%if all(ctrb_ranks == length(e))
+%    disp('Yes!')
+%else
+%    disp('*** NO! ***')
+%end
 
 %% Controller design
 % Let's try LQR control.
@@ -65,21 +66,36 @@ Q(11, 11) = 9000;
 R = [1 0; 0 1];
 K = lqr(Atilde, Btilde, Q, R);
 K1 = K(:, 1:9); K2 = K(:, 10:11);
-disp('Q:'), disp(Q)
-disp('R:'), disp(R)
-disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
-disp('K:'), disp(K)
+%disp('Q:'), disp(Q)
+%disp('R:'), disp(R)
+%disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
+%disp('K:'), disp(K)
 
-%% Closed-loop response of linearized system
-Acl = [A-B*K1 -B*K2; C zeros(2)];
-Bcl = [zeros(9,2); -eye(2)];
-Ccl = [C zeros(2)];
-Dcl = zeros(2);
-cls_sys = ss(Acl, Bcl, Ccl, Dcl);
-figure
-step(cls_sys)
+%%% Closed-loop response of linearized system
+%Acl = [A-B*K1 -B*K2; C zeros(2)];
+%Bcl = [zeros(9,2); -eye(2)];
+%Ccl = [C zeros(2)];
+%Dcl = zeros(2);
+%cls_sys = ss(Acl, Bcl, Ccl, Dcl);
+%figure
+%step(cls_sys)
 
-%% TODO: Observer design - angle attitudes (yaw, pitch, roll) are unknown
+%% PBH observability test
+e = eig(A);
+obs_ranks = zeros(size(e));
+for i = 1:length(e)
+	obs_ranks(i) = rank([C; (A-e(i)*eye(size(A)))]);
+end
+%disp('PBH observability results - all modes observable?')
+%if all(obs_ranks == length(e))
+%    disp('Yes!')
+%else
+%    disp('*** NO! ***')
+%end
+
+%% Observer design - angle attitudes (yaw, pitch, roll) are unknown
+% Pole placement!
+H = place(A', C', -10*(1:9))';
 
 %% Prepare Nyquist and pole-zero plots for each input-state TF
 %for input=1:size(B, 2)
