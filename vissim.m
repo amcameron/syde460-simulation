@@ -49,4 +49,15 @@ function vissim(xs, ts);
              1/2*mass*power(norm(xs(:,4:6), 'rows'), 2) + ...
 	     1/2*dot(xs(:,10:12)', I*xs(:,10:12)', 1)');
     title('energy');
+
+	% plot the path planner and controller outputs
+	figure
+	[ps ds] = intermediaries(xs, ts);
+	subplot(2, 1, 1);
+	plot(ts, ps);
+	title('path plan');
+
+	subplot(2, 1, 2);
+	plot(ts, ds);
+	title('controller output');
 end
