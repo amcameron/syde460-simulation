@@ -21,7 +21,8 @@
 % -the derivative of the integrated output error is the current output error.
 function Xdot = sim3d(t, X)
     % P     = planpath(X);
-    P     = [0 0]';
+    % Try for steady, stable flight: -0.4149 pitch, zero roll.
+    P     = [-.4149-X(8) -X(9)]';
     x     = localize_state(X);
     z     = X(13:14);
     d     = controller(x, z);
