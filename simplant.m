@@ -57,15 +57,17 @@ end
 %% Controller design
 % Let's try LQR control.
 % Q is the penalty for state variables. Let's penalize them  all.
-% Penalize pitch rate especially hard.
 Q = eye(size(Atilde));
-Q(10, 10) = 9000;
-Q(11, 11) = 9000;
-% R is the penalty for control signals. Let's penalize them both, especially
-% the longitudinal control input.
-R = [1 0; 0 1];
+Q(4,4) = 500;
+Q(8,8) = 500;
+Q(9,9) = 500;
+%Q(10, 10) = 90;
+%Q(11, 11) = 90;
+% R is the penalty for control signals.
+R = 50*[1 0; 0 1];
 K = lqr(Atilde, Btilde, Q, R);
-K1 = K(:, 1:9); K2 = K(:, 10:11);
+K1 = K(:, 1:9);
+K2 = K(:, 10:11);
 %disp('Q:'), disp(Q)
 %disp('R:'), disp(R)
 %disp('eig(A~ - B~*K):'), disp(eig(Atilde - Btilde*K))
