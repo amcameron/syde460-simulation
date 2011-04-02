@@ -97,7 +97,8 @@ end
 
 %% Observer design - angle attitudes (yaw, pitch, roll) are unknown
 % Pole placement!
-H = place(A', C', -10*(1:9))';
+%H = place(A', C', -10*(1:9))';
+H = 0;
 
 %% Prepare Nyquist and pole-zero plots for each input-state TF
 %for input=1:size(B, 2)

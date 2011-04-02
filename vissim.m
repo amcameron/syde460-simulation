@@ -11,7 +11,6 @@ function vissim(xs, ts);
     % plot(xs(:,1), xs(:,2));
     % title('birds eye view');
     plot3(xs(:, 1), xs(:,2), xs(:,3));
-    axis equal
     title('trajectory');
 
     subplot(3, 3, 3);
@@ -52,16 +51,16 @@ function vissim(xs, ts);
          1/2*dot(xs(:,10:12)', I*xs(:,10:12)', 1)');
     title('energy');
 
-    % plot the path planner and controller outputs
-    figure
-    [ps ds] = intermediaries(xs, ts);
-    subplot(2, 1, 1);
-    plot(ts, 180/pi*ps);
-    title('path plan');
-    legend('pitch', 'roll');
+    % % plot the path planner and controller outputs
+    % figure
+    % [ps ds] = intermediaries(xs, ts);
+    % subplot(2, 1, 1);
+    % plot(ts, 180/pi*ps);
+    % title('path plan');
+    % legend('pitch', 'roll');
 
-    subplot(2, 1, 2);
-    plot(ts, 180/pi*ds);
-    title('controller output');
-    legend('pitch', 'roll');
+    % subplot(2, 1, 2);
+    % plot(ts, 180/pi*ds);
+    % title('controller output');
+    % legend('pitch', 'roll');
 end

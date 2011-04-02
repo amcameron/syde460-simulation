@@ -41,6 +41,7 @@ function P = planpath(X)
     % P = [pitch_star, -yaw_star];
 
     % we have control of pitch and roll, but pitch and yaw are how trajectory works
-    P = [sqrt(pitch_star^2 + yaw_star^2), atan2(-yaw_star, pitch_star)];
+    cur_roll = mod(X(9) + pi, 2*pi) - pi;
+    P = [sqrt(pitch_star^2 + yaw_star^2), max(min(atan2(-yaw_star, pitch_star), -pi/8 - cur_roll), pi/8 - cur_roll)];
 end
 
