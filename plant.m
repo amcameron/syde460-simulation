@@ -70,19 +70,19 @@ function Xdot = plant(X, d)
     Xdot(7:9) = inv( [ 0 -sin(X(7)) cos(X(8))*cos(X(7)); ...
 		       0  cos(X(7)) cos(X(8))*sin(X(7)); ...
 		       1  0         -sin(X(7)) ] )*X(10:12);
-    % Xdot(7:9) = X(10:12);
 
     % F = ma
     Xdot(4:6) = F/m;
 
     % α = I^-1(M - ω x Iω)
-    % M = Iα (along primary axes only)
-    % XXX HORRIBLE ASSUMPTION 
-    % model glider as a sphere (great flying spheres of mathland!)
-    % ^-- Andrew endorses the above comment.
-    Xdot(10) = M(3)/(2/5*m*norm(cw)^2);
-    Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
-    Xdot(12) = M(1)/(2/5*m*norm(cw)^2);
+    Ixx = 242.17;
+    Iyy = 111.81;
+    Izz = 255.99;
+    Ixz = -30.54;
+    I = [  Ixx 0    -Ixz;
+	   0   Iyy   0;
+	  -Ixz 0     Izz ];
+    Xdot(10:12) = inv(I)*(M - cross(X(10:12), Rb'*I*Rb'*X(10:12)));
 end
 
 % coefficient of lift (only considers incidence ATM)
