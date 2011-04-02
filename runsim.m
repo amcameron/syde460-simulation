@@ -11,7 +11,7 @@ function [xs, ts] = runsim()
           0      0   0   ...
           0      0       ...
     ];
-    ts = linspace(0, 5, 1000);
+    ts = linspace(0, 3.5, 1000);
     sim = @(x,t)sim3d(t, x);
     lsode_options('integration method', 'stiff');
     xs = lsode(sim, xinit, ts);

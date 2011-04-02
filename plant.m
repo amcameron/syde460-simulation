@@ -63,12 +63,19 @@ function Xdot = plant(X, d)
          + cross(cw,  L*uaz) ...
          + cross(cw, -D*uax);
 
-    % position derivatives given by speeds
+    % d/dt(r) = v
     Xdot(1:3) = X(4:6);
-    Xdot(7:9) = X(10:12);
+
+    % euler rate conversion
+    Xdot(7:9) = inv( [ 0 -sin(X(7)) cos(X(8))*cos(X(7)); ...
+		       0  cos(X(7)) cos(X(8))*sin(X(7)); ...
+		       1  0         -sin(X(7)) ] )*X(10:12);
+    % Xdot(7:9) = X(10:12);
 
     % F = ma
     Xdot(4:6) = F/m;
+
+    % α = I^-1(M - ω x Iω)
     % M = Iα (along primary axes only)
     % XXX HORRIBLE ASSUMPTION 
     % model glider as a sphere (great flying spheres of mathland!)
