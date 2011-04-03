@@ -12,7 +12,7 @@ function P = planpath(X)
 
     % first priority - stay level
     verticality = dot(udir, [0 0 1]);
-    if verticality > sin(pi/16)
+    if verticality > sin(pi/4)
 	d_by_d_yaw   = (1/delt)*(dot(udir_plus_d_yaw,   [0 0 1]) - verticality);
 	d_by_d_pitch = (1/delt)*(dot(udir_plus_d_pitch, [0 0 1]) - verticality);
 	yaw_star     = -step*d_by_d_yaw;
@@ -20,7 +20,7 @@ function P = planpath(X)
     else
 	% second priority - align craft orientation with trajectory
 	alignedness = dot(utraj, udir);
-	if alignedness < cos(pi/16)
+	if alignedness < cos(pi/4)
 	    d_by_d_yaw   = (1/delt)*(dot(utraj, udir_plus_d_yaw)   - alignedness);
 	    d_by_d_pitch = (1/delt)*(dot(utraj, udir_plus_d_pitch) - alignedness);
 	    yaw_star   = step*d_by_d_yaw;
@@ -41,6 +41,7 @@ function P = planpath(X)
     % P = [pitch_star, -yaw_star];
 
     % we have control of pitch and roll, but pitch and yaw are how trajectory works
-    P = [sqrt(pitch_star^2 + yaw_star^2), atan2(-yaw_star, pitch_star)];
+    cur_roll = mod(X(9) + pi, 2*pi) - pi;
+    P = [sqrt(pitch_star^2 + yaw_star^2), -max(min(atan2(-yaw_star, pitch_star), -pi/8 - cur_roll), pi/8 - cur_roll)];
 end
 

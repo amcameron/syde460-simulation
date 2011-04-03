@@ -11,7 +11,7 @@ function [xs, ts] = runsim()
           0      0   0   ...
           0      0       ...
     ];
-    tspan = [0 2.0];
+    tspan = [0 15.0];
     sim = @sim3d;
     [ts xs] = ode15s(sim, tspan, xinit);
 end

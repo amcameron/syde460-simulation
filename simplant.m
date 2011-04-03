@@ -44,8 +44,11 @@ Btilde = [B; zeros(2,2)];
 %% PBH controllability test
 e = eig(Atilde);
 ctrb_ranks = zeros(size(e));
+ctrb_conds = zeros(size(e));
 for i = 1:length(e)
-	ctrb_ranks(i) = rank([(e(i)*eye(size(Atilde)) - Atilde) Btilde]);
+	cur_ctrb = [(e(i)*eye(size(Atilde)) - Atilde) Btilde];
+	ctrb_ranks(i) = rank(cur_ctrb);
+	ctrb_conds(i) = cond(cur_ctrb);
 end
 %disp('PBH controllability results - all modes controllable?')
 %if all(ctrb_ranks == length(e))
@@ -97,13 +100,14 @@ end
 
 %% Observer design - angle attitudes (yaw, pitch, roll) are unknown
 % Pole placement!
-H = place(A', C', -10*(1:9))';
+%H = place(A', C', -10*(1:9))';
+H = 0;
 
 %% Prepare Nyquist and pole-zero plots for each input-state TF
 %for input=1:size(B, 2)
 %	subB = B(:, input);
-%	for state=1:size(C, 1)
-%		subC = zeros(1, size(C, 1));
+%	for state=1:size(C, 2)
+%		subC = zeros(1, size(C, 2));
 %		subC(state) = 1;
 %		subsys = ss(A, subB, subC, []);
 %		if ((input == 1) && (state < 5)) || ((input == 2) && (state > 4))

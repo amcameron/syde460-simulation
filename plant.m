@@ -57,25 +57,32 @@ function Xdot = plant(X, d)
     F  = ((mp + mw)*g*ug)' ...
          + L*uaz ...
          + D*uax ...
-         + cross(cw, Mp * uay);
+         + Mp/norm(cross(cw, uay)) * cross(cw, uay)/norm(cross(cw, uay));
 
     M  = Mp*uay ...
          + cross(cw,  L*uaz) ...
          + cross(cw, -D*uax);
 
-    % position derivatives given by speeds
+    % d/dt(r) = v
     Xdot(1:3) = X(4:6);
-    Xdot(7:9) = X(10:12);
+
+    % euler rate conversion
+    Xdot(7:9) = inv( [ 0 -sin(X(7)) cos(X(8))*cos(X(7)); ...
+		       0  cos(X(7)) cos(X(8))*sin(X(7)); ...
+		       1  0         -sin(X(7)) ] )*X(10:12);
 
     % F = ma
     Xdot(4:6) = F/m;
-    % M = Iα (along primary axes only)
-    % XXX HORRIBLE ASSUMPTION 
-    % model glider as a sphere (great flying spheres of mathland!)
-    % ^-- Andrew endorses the above comment.
-    Xdot(10) = M(3)/(2/5*m*norm(cw)^2);
-    Xdot(11) = M(2)/(2/5*m*norm(cw)^2);
-    Xdot(12) = M(1)/(2/5*m*norm(cw)^2);
+
+    % α = I^-1(M - ω x Iω)
+    Ixx = 242.17;
+    Iyy = 111.81;
+    Izz = 255.99;
+    Ixz = -30.54;
+    I = Rb * [  Ixx 0    -Ixz;
+	        0   Iyy   0;
+	       -Ixz 0     Izz ] * Rb';
+    Xdot(10:12) = inv(I)*(M - cross(X(10:12), I*X(10:12)));
 end
 
 % coefficient of lift (only considers incidence ATM)
