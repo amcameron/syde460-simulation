@@ -79,10 +79,10 @@ function Xdot = plant(X, d)
     Iyy = 111.81;
     Izz = 255.99;
     Ixz = -30.54;
-    I = [  Ixx 0    -Ixz;
-	   0   Iyy   0;
-	  -Ixz 0     Izz ];
-    Xdot(10:12) = inv(I)*(M - cross(X(10:12), Rb*I*Rb'*X(10:12)));
+    I = Rb * [  Ixx 0    -Ixz;
+	        0   Iyy   0;
+	       -Ixz 0     Izz ] * Rb';
+    Xdot(10:12) = inv(I)*(M - cross(X(10:12), I*X(10:12)));
 end
 
 % coefficient of lift (only considers incidence ATM)
