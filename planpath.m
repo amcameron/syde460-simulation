@@ -12,7 +12,7 @@ function P = planpath(X)
 
     % first priority - stay level
     verticality = dot(udir, [0 0 1]);
-    if verticality > sin(pi/16)
+    if verticality > sin(pi/4)
 	d_by_d_yaw   = (1/delt)*(dot(udir_plus_d_yaw,   [0 0 1]) - verticality);
 	d_by_d_pitch = (1/delt)*(dot(udir_plus_d_pitch, [0 0 1]) - verticality);
 	yaw_star     = -step*d_by_d_yaw;
@@ -20,7 +20,7 @@ function P = planpath(X)
     else
 	% second priority - align craft orientation with trajectory
 	alignedness = dot(utraj, udir);
-	if alignedness < cos(pi/16)
+	if alignedness < cos(pi/4)
 	    d_by_d_yaw   = (1/delt)*(dot(utraj, udir_plus_d_yaw)   - alignedness);
 	    d_by_d_pitch = (1/delt)*(dot(utraj, udir_plus_d_pitch) - alignedness);
 	    yaw_star   = step*d_by_d_yaw;
