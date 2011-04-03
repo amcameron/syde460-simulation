@@ -15,7 +15,8 @@ function d = controller(x, z)
     d = (-[Kstate Kref]*[x3d; z])';
 
     % Add steady-state trim to the controller's differential output.
-    d     = d + [-0.83301 0];
+    % d     = d + [-0.83301 0];
+    d     = [d(1)-0.83301 -d(2)];
 
     % limit to physically achievable values
     d = max(min(d, pi/4), -pi/4);
